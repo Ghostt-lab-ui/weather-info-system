@@ -118,3 +118,9 @@ function getWeatherIcon(condition) {
 function showError(message) {
     weatherContainer.innerHTML = `<div class="error">❌ ${message}</div>`;
 }
+window.onload = function() {
+    const savedCity = localStorage.getItem("savedCity");
+    if (savedCity) {
+        getWeather(savedCity);
+    }
+};
