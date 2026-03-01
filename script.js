@@ -5,8 +5,75 @@ const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const weatherContainer = document.getElementById("weatherContainer");
 
-// Event listeners
-searchBtn.addEventListener("click", searchWeather);
+// Screens
+const welcomeScreen = document.getElementById("welcomeScreen");
+const loginScreen = document.getElementById("loginScreen");
+const appScreen = document.getElementById("appScreen");
+
+// Buttons
+const loginBtn = document.getElementById("loginBtn");
+const signInBtn = document.getElementById("signInBtn");
+const menuBtn = document.getElementById("menuBtn");
+const saveLocationBtn = document.getElementById("saveLocationBtn");
+const notificationsBtn = document.getElementById("notificationsBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// Show welcome screen on load
+window.onload = function() {
+    welcomeScreen.classList.remove("hidden");
+};
+
+// Handle welcome → login
+loginBtn.addEventListener("click", () => {
+    welcomeScreen.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
+});
+
+// Handle login → app
+signInBtn.addEventListener("click", () => {
+    loginScreen.classList.add("hidden");
+    appScreen.classList.remove("hidden");
+
+    // Load saved city if available
+    const savedCity = localStorage.getItem("savedCity");
+    if (savedCity) {
+        searchWeather(savedCity);
+    }
+});
+
+// Menu toggle
+menuBtn.addEventListener("click", () => {
+    document.getElementById("menu").classList.toggle("hidden");
+});
+
+// Save location
+saveLocationBtn.addEventListener("click", () => {
+    const city = searchInput.value.trim();
+    if (city) {
+        localStorage.setItem("savedCity", city);
+        alert(`✅ Saved ${city} as your default location`);
+    }
+});
+
+// Notifications toggle
+notificationsBtn.addEventListener("click", () => {
+    if ("Notification" in window) {
+        Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+                alert("🔔 Notifications enabled!");
+            }
+        });
+    }
+});
+
+// Logout
+logoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    location.reload();
+});
+
+// Event listeners for search
+searchBtn.addEventListener("click", () => searchWeather());
 searchInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
         searchWeather();
@@ -70,6 +137,9 @@ function displayWeather(data) {
 
     weatherContainer.innerHTML = weatherHTML;
     searchInput.value = "";
+
+    // Send weather advice notification
+    sendWeatherAdvice(temp, condition);
 }
 
 // Weather icons
@@ -99,10 +169,21 @@ function showError(message) {
     weatherContainer.innerHTML = `<div class="error">❌ ${message}</div>`;
 }
 
-// Load saved city on startup
-window.onload = function() {
-    const savedCity = localStorage.getItem("savedCity");
-    if (savedCity) {
-        searchWeather(savedCity);
+// Weather advice notifications
+function sendWeatherAdvice(temp, condition) {
+    if (Notification.permission === "granted") {
+        let advice = "";
+
+        if (temp >= 30) {
+            advice = "It's hot 🌞. Wear light clothes!";
+        } else if (condition.toLowerCase().includes("rain")) {
+            advice = "It's raining 🌧️. Carry an umbrella and wear warm clothes!";
+        } else if (condition.toLowerCase().includes("snow")) {
+            advice = "Snowy ❄️. Dress warmly!";
+        }
+
+        if (advice) {
+            new Notification("Weather Advice", { body: advice });
+        }
     }
-};
+}
