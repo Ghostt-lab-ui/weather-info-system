@@ -35,7 +35,9 @@ function searchWeather() {
             }
             return response.json();
         })
-        .then((data) => {
+        .then((data) => {function getWeather(city) {
+    fetch(...)
+}
             displayWeather(data);
         })
         .catch((error) => {
